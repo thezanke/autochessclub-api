@@ -1,6 +1,10 @@
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 
-from src.router import router
+from src.routes import health
 
-app = FastAPI()
+app = FastAPI(root_path="/api")
+
+router = APIRouter()
+router.include_router(health.router)
+
 app.include_router(router)
