@@ -1,0 +1,8 @@
+services:
+  db:
+    image: postgres:17.5
+    environment:
+      POSTGRES_USER: autochessclub
+      POSTGRES_PASSWORD: autochessclub
+    ports:
+      - "5555:5432"
