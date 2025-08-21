@@ -20,7 +20,7 @@ if config.config_file_name is not None:
 
 # pylint: disable=wrong-import-position
 from src.core.config import settings
-from src.models import SQLModel
+from src.db.models import SQLModel
 
 target_metadata = SQLModel.metadata
 
