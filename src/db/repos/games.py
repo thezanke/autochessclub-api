@@ -45,9 +45,7 @@ def get_node(
     if isinstance(game, str):
         game = get(game, session=session)
 
-    query = (
-        select(GameNode).order_by(desc(GameNode.ply)).where(GameNode.game == game)
-    )
+    query = select(GameNode).order_by(desc(GameNode.ply)).where(GameNode.game == game)
 
     if ply is not None:
         query = query.where(GameNode.ply == ply)

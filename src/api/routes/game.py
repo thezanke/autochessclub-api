@@ -7,7 +7,10 @@ from src.db.models import GamePublic
 from src.db.repos import games, positions, preferred_moves
 from src.utils import board_to_zkey
 
-router = APIRouter(tags=["game"])
+router = APIRouter(
+    prefix="/game",
+    tags=["game"],
+)
 
 MOCK_PLAYER_ID = uuid.uuid4()
 
