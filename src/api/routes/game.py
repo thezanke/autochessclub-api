@@ -132,7 +132,7 @@ def make_move(
     return game
 
 
-@router.post("/{game_id}/moves/preferred")
+@router.get("/{game_id}/moves/preferred")
 def get_preferred_move(
     game_id: str,
     ply: int | None = None,
@@ -166,9 +166,8 @@ def get_preferred_move(
         session=session,
     )
 
-    return preferred_moves.get_for_player_position(
+    return preferred_moves.get_for_position(
         playerId,
-        scope,
         position.id,
         session=session,
     )

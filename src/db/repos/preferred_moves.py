@@ -5,9 +5,8 @@ from sqlmodel import Session
 from src.db.models import PreferredMove
 
 
-def get_for_player_position(
+def get_for_position(
     player_id: uuid.UUID,
-    scope: str,
     position_id: uuid.UUID,
     *,
     session: Session,
