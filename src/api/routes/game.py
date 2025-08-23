@@ -2,7 +2,7 @@ import chess
 from fastapi import APIRouter, status, exceptions
 
 from src.api.deps import PlayerIDDep, SessionDep
-from src.db.models import GamePublic
+from src.db.models import GamePublic, PreferredMove
 from src.db.repos import games, positions, preferred_moves
 from src.utils import board_to_zkey
 
@@ -51,7 +51,7 @@ def get_game(
 def make_move(
     game_id: str,
     move_san: str,
-    is_preferred: bool,
+    is_preferred: bool | None = None,
     *,
     player_id: PlayerIDDep,
     session: SessionDep,
@@ -97,6 +97,7 @@ def make_move(
 
     new_node = games.create_node(
         game_id=game.id,
+        from_san=move_san,
         position_id=new_position.id,
         session=session,
     )
@@ -173,6 +174,42 @@ def get_preferred_move(
     )
 
 
+@router.post("/{game_id}/moves/preferred", response_model=PreferredMove)
+def prefer_move(
+    game_id: str,
+    ply: int,
+    *,
+    session: SessionDep,
+    player_id: PlayerIDDep,
+):
+    node = games.get_node(
+        game_id,
+        ply,
+        session=session,
+    )
+
+    if not node:
+        raise exceptions.HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Game or node not found",
+        )
+
+    next_node = games.get_node(game_id, ply + 1, session=session)
+    if not next_node:
+        raise exceptions.HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Next move not found",
+        )
+
+    return preferred_moves.create(
+        player_id=player_id,
+        position_id=node.position_id,
+        next_position_id=next_node.position_id,
+        san=next_node.from_san,  # This would be set when the move is made
+        session=session,
+    )
+
+
 @router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_game(
     game_id: str,
@@ -187,7 +224,7 @@ def delete_game(
             detail="Game not found",
         )
 
-    if game.white_player_id != playerId:
+    if game.white_player_id != playerId and game.black_player_id != playerId:
         raise exceptions.HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this game",

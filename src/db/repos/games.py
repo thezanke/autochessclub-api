@@ -80,6 +80,7 @@ def delete(
 def create_node(
     game_id: str,
     position_id: str,
+    from_san: str | None = None,
     *,
     session: Session,
 ):
@@ -95,6 +96,7 @@ def create_node(
     new_node = GameNode(
         game_id=game.id,
         position_id=position_id,
+        from_san=from_san,
         ply=last_node.ply + 1,
     )
 

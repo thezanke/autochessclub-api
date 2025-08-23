@@ -61,6 +61,7 @@ class GameNodeBase(SQLModel):
         ondelete="CASCADE",
     )
     ply: int = Field(primary_key=True)
+    from_san: str | None = Field(default=None, nullable=True)
     position_id: uuid.UUID = Field(
         foreign_key="position.id",
         index=True,
