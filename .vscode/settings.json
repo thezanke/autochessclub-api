@@ -1,5 +1,6 @@
 {
   "pylint.importStrategy": "fromEnvironment",
   "editor.defaultFormatter": "ms-python.black-formatter",
-  "black-formatter.importStrategy": "fromEnvironment"
+  "black-formatter.importStrategy": "fromEnvironment",
+  "editor.formatOnSave": true
 }

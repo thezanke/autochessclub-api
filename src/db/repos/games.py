@@ -50,4 +50,56 @@ def get_node(
     if ply is not None:
         query = query.where(GameNode.ply == ply)
 
-    return session.exec(query).one_or_none()
+    return session.exec(query).first()
+
+
+def find(
+    *,
+    session: Session,
+):
+    query = select(Game)
+    return session.exec(query).all()
+
+
+def delete(
+    game_id: str,
+    *,
+    session: Session,
+):
+    game = get(game_id, session=session)
+
+    if not game:
+        return False
+
+    session.delete(game)
+    session.commit()
+
+    return True
+
+
+def create_node(
+    game_id: str,
+    position_id: str,
+    *,
+    session: Session,
+):
+    game = get(game_id, session=session)
+
+    if not game:
+        return None
+
+    last_node = get_node(game, None, session=session)
+    if not last_node:
+        return None
+
+    new_node = GameNode(
+        game_id=game.id,
+        position_id=position_id,
+        ply=last_node.ply + 1,
+    )
+
+    session.add(new_node)
+    session.commit()
+    session.refresh(new_node)
+
+    return new_node

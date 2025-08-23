@@ -1,4 +1,5 @@
 from typing import Annotated
+import uuid
 from fastapi.params import Depends
 from sqlmodel import Session
 
@@ -11,3 +12,13 @@ def get_session():
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+
+MOCK_PLAYER_ID = uuid.UUID("00000000-0000-0000-0000-000000000000")
+
+
+def get_player_id():
+    return MOCK_PLAYER_ID
+
+
+PlayerIDDep = Annotated[uuid.UUID, Depends(get_player_id)]

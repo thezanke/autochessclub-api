@@ -14,7 +14,7 @@ def get_or_create(
     ).first()
 
     if position is None:
-        position = Position(fen_norm=fen_norm, zkey=zkey)
+        position: Position = Position(fen_norm=fen_norm, zkey=zkey)
 
         session.add(position)
         session.commit()

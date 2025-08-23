@@ -96,7 +96,6 @@ class PreferredMove(SQLModel, table=True):
     __tablename__ = "preferred_move"
 
     player_id: uuid.UUID = Field(index=True, primary_key=True)
-    scope: bool = Field(index=True, primary_key=True)
     position_id: uuid.UUID = Field(
         primary_key=True,
         foreign_key="position.id",
@@ -107,7 +106,7 @@ class PreferredMove(SQLModel, table=True):
         index=True,
         ondelete="CASCADE",
     )
-    uci: str = Field()
+    san: str = Field()
     created_at: datetime = Field(
         default_factory=datetime.now,
         sa_column_kwargs={"server_default": func.now()},
