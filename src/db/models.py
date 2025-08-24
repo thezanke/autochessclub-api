@@ -88,6 +88,7 @@ class GameNodePublic(SQLModel):
     position_id: uuid.UUID
     white_clock: int | None
     black_clock: int | None
+    from_san: str | None
     created_at: datetime
 
     position: "Position" = []
