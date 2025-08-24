@@ -3,15 +3,19 @@ from sqlmodel import Session, select
 from src.db.models import Position
 
 
-def get_or_create(
+def get_one(fen_norm: str, zkey: int, *, session: Session):
+    return session.exec(
+        select(Position).where(Position.zkey == zkey, Position.fen_norm == fen_norm)
+    ).first()
+
+
+def get_or_create_one(
     fen_norm: str,
     zkey: int,
     *,
     session: Session,
 ):
-    position = session.exec(
-        select(Position).where(Position.fen_norm == fen_norm)
-    ).first()
+    position = get_one(fen_norm, zkey, session=session)
 
     if position is None:
         position: Position = Position(fen_norm=fen_norm, zkey=zkey)

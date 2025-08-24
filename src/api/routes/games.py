@@ -1,5 +1,6 @@
 import chess
 from fastapi import APIRouter, status, exceptions
+from pydantic import BaseModel
 
 from src.api.deps import PlayerIDDep, SessionDep
 from src.db.models import GamePublic, PreferredMove
@@ -28,7 +29,7 @@ def create_game(
     playerId: PlayerIDDep,
 ):
     board = chess.Board(fen)
-    starting_pos = positions.get_or_create(
+    starting_pos = positions.get_or_create_one(
         board.fen(en_passant="legal"),
         board_to_zkey(board),
         session=session,
@@ -38,7 +39,7 @@ def create_game(
     return game
 
 
-@router.get("/{game_id}", response_model=GamePublic)
+@router.get("/{game_id}/", response_model=GamePublic)
 def get_game(
     game_id: str,
     *,
@@ -47,11 +48,15 @@ def get_game(
     return games.get(game_id, session=session)
 
 
-@router.post("/{game_id}/moves", response_model=GamePublic)
+class MakeMoveRequest(BaseModel):
+    move_san: str
+    is_preferred: bool | None = None
+
+
+@router.post("/{game_id}/move/", response_model=GamePublic)
 def make_move(
     game_id: str,
-    move_san: str,
-    is_preferred: bool | None = None,
+    dto: MakeMoveRequest,
     *,
     player_id: PlayerIDDep,
     session: SessionDep,
@@ -73,7 +78,7 @@ def make_move(
     board = chess.Board(current_node.position.fen_norm)
 
     try:
-        chess_move = board.parse_san(move_san)
+        chess_move = board.parse_san(dto.move_san)
     except ValueError as e:
         print(e)
         raise exceptions.HTTPException(
@@ -89,7 +94,7 @@ def make_move(
 
     board.push(chess_move)
 
-    new_position = positions.get_or_create(
+    new_position = positions.get_or_create_one(
         board.fen(en_passant="legal"),
         board_to_zkey(board),
         session=session,
@@ -97,17 +102,17 @@ def make_move(
 
     new_node = games.create_node(
         game_id=game.id,
-        from_san=move_san,
+        from_san=dto.move_san,
         position_id=new_position.id,
         session=session,
     )
 
-    if is_preferred:
+    if dto.is_preferred:
         preferred_moves.create(
             player_id=player_id,
             position_id=current_node.position_id,
             next_position_id=new_position.id,
-            san=move_san,
+            san=dto.move_san,
             session=session,
         )
 
@@ -133,7 +138,7 @@ def make_move(
     return game
 
 
-@router.get("/{game_id}/moves/preferred")
+@router.get("/{game_id}/preferred/")
 def get_preferred_move(
     game_id: str,
     ply: int | None = None,
@@ -161,7 +166,7 @@ def get_preferred_move(
     elif scope != board.turn:
         board.turn = scope
 
-    position = positions.get_or_create(
+    position = positions.get_or_create_one(
         board.fen(en_passant="legal"),
         board_to_zkey(board),
         session=session,
@@ -174,7 +179,7 @@ def get_preferred_move(
     )
 
 
-@router.post("/{game_id}/moves/preferred", response_model=PreferredMove)
+@router.post("/{game_id}/preferred/", response_model=PreferredMove)
 def prefer_move(
     game_id: str,
     ply: int,
@@ -210,7 +215,7 @@ def prefer_move(
     )
 
 
-@router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{game_id}/", status_code=status.HTTP_204_NO_CONTENT)
 def delete_game(
     game_id: str,
     *,

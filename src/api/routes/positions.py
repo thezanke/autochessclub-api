@@ -44,7 +44,7 @@ def get_position(
                 detail="Either position_id or fen must be provided",
             )
         board = chess.Board(fen)
-        position = positions.get_or_create(
+        position = positions.get_one(
             fen_norm=board.fen(en_passant="legal"),
             zkey=board_to_zkey(board),
             session=session,
