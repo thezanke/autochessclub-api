@@ -21,3 +21,11 @@ def get_or_create(
         session.refresh(position)
 
     return position
+
+
+def get_by_id(
+    position_id: int,
+    *,
+    session: Session,
+):
+    return session.get(Position, position_id)

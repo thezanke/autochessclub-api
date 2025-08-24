@@ -8,15 +8,24 @@ if TYPE_CHECKING:
     func: Callable
 
 
-class Position(SQLModel, table=True):
+class PositionBase(SQLModel):
+    fen_norm: str = Field(unique=True)
+    zkey: int = Field(sa_column=Column(BigInteger, index=True))
+
+
+class Position(PositionBase, table=True):
     __tablename__ = "position"
 
     id: uuid.UUID | None = Field(
         primary_key=True,
         sa_column_kwargs={"server_default": text("gen_random_uuid()")},
     )
-    fen_norm: str = Field(unique=True)
-    zkey: int = Field(sa_column=Column(BigInteger, index=True))
+
+
+class PositionPublic(PositionBase):
+    id: uuid.UUID | None
+    fen_norm: str
+    zkey: int
 
 
 class GameBase(SQLModel):

@@ -16,7 +16,7 @@ def create(
         nodes=[
             GameNode(
                 position_id=starting_pos.id,
-                ply=1,
+                ply=0,
             )
         ],
     )
