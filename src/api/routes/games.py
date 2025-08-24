@@ -7,8 +7,8 @@ from src.db.repos import games, positions, preferred_moves
 from src.utils import board_to_zkey
 
 router = APIRouter(
-    prefix="/game",
-    tags=["game"],
+    prefix="/games",
+    tags=["games"],
 )
 
 
